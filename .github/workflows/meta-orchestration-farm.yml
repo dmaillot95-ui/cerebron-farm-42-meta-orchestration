@@ -1,0 +1,69 @@
+name: CEREBRON Farm 42 Meta-Orchestration
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  agents:
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - {role: ROUTER_ARCHITECT, model: huggingface-projects/llama-3.2-3B-Instruct}
+          - {role: DEPENDENCY_GRAPH_AUDITOR, model: huggingface-projects/gemma-2-9b-it}
+          - {role: SEQUENCING_OPTIMIZER, model: huggingface-projects/llama-3.2-3B-Instruct}
+          - {role: PARALLELISM_AUDITOR, model: huggingface-projects/gemma-2-9b-it}
+          - {role: EVIDENCE_INDEPENDENCE_AUDITOR, model: huggingface-projects/llama-3.2-3B-Instruct}
+          - {role: CONSENSUS_FAILURE_AUDITOR, model: huggingface-projects/gemma-2-9b-it}
+          - {role: CONTRADICTION_ROUTER, model: huggingface-projects/llama-3.2-3B-Instruct}
+          - {role: VERIFICATION_GATE_DESIGNER, model: huggingface-projects/gemma-2-9b-it}
+          - {role: STOPPING_RULE_AUDITOR, model: huggingface-projects/llama-3.2-3B-Instruct}
+          - {role: FAILURE_RECOVERY_ARCHITECT, model: huggingface-projects/gemma-2-9b-it}
+          - {role: BOTTLENECK_ANALYST, model: huggingface-projects/llama-3.2-3B-Instruct}
+          - {role: RESOURCE_ALLOCATION_AUDITOR, model: huggingface-projects/gemma-2-9b-it}
+          - {role: TASK_DECOMPOSITION_AUDITOR, model: huggingface-projects/llama-3.2-3B-Instruct}
+          - {role: ESCALATION_POLICY_AUDITOR, model: huggingface-projects/gemma-2-9b-it}
+          - {role: MEMORY_HANDOFF_AUDITOR, model: huggingface-projects/llama-3.2-3B-Instruct}
+          - {role: CROSS_FARM_COORDINATOR_AUDITOR, model: huggingface-projects/gemma-2-9b-it}
+          - {role: REDUNDANCY_DEDUP_SPECIALIST, model: huggingface-projects/llama-3.2-3B-Instruct}
+          - {role: QUALITY_CONTROL_ORCHESTRATOR, model: huggingface-projects/gemma-2-9b-it}
+          - {role: META_RED_TEAM, model: huggingface-projects/llama-3.2-3B-Instruct}
+          - {role: OMEGA_META_ORCHESTRATION_JUDGE, model: huggingface-projects/gemma-2-9b-it}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: pip install -q hf-gradio
+      - run: python worker/agent.py
+        env:
+          ROLE: ${{ matrix.role }}
+          MODEL: ${{ matrix.model }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: farm42-${{ matrix.role }}
+          path: result.json
+  omega:
+    needs: agents
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: {path: artifacts}
+      - name: Build Omega packet
+        run: |
+          python - <<'PY'
+          import glob,json,pathlib
+          rows=[]
+          for f in glob.glob('artifacts/**/result.json',recursive=True):
+              try: rows.append(json.load(open(f)))
+              except Exception: pass
+          ok=[r for r in rows if r.get('inference_success') is True and r.get('status')=='UNREVIEWED_EXTERNAL_AGENT_OUTPUT']
+          packet={'farm':42,'roles_returned':len(rows),'successful_external_ai_calls':len(ok),'failed_external_ai_calls':len(rows)-len(ok),'status':'UNREVIEWED_EXTERNAL_AGENT_OUTPUT','rules':['CLAIM<=EVIDENCE','CONSENSUS!=TRUTH','AGENT COUNT!=INTELLIGENCE','SAME MODEL/DATA!=INDEPENDENT EVIDENCE'],'rows':rows}
+          pathlib.Path('packet.json').write_text(json.dumps(packet,ensure_ascii=False,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meta-orchestration-farm-42-omega-packet
+          path: packet.json
