@@ -1,4 +1,6 @@
-import hashlib,json,os,pathlib,subprocess
+import hashlib,json,os,pathlib,subprocess,sys
+sys.path.append('worker')
+from registry_loader import load_registry
 PREFERRED=['/generate','/chat','/predict','/respond','/infer','/run']
 def run(cmd,timeout=240):
     return subprocess.run(cmd,capture_output=True,text=True,timeout=timeout)
@@ -41,7 +43,11 @@ def invoke(space,prompt):
         errors.append((ep,(pred.stderr or pred.stdout)[-2000:]))
     return False,'',{'errors':errors}
 role=os.environ['ROLE']; model=os.environ['MODEL']
-prompt=f'''You are FARM 42 META-ORCHESTRATION role {role}. Audit orchestration quality across multi-agent/multi-model systems. Examine routing, sequencing, dependency structure, duplicated evidence, contradiction handling, stopping rules, failure recovery, bottlenecks, verification gates, and whether parallelism creates real independent evidence. Never equate agent count with intelligence or consensus with truth. Distinguish established facts, derived conclusions, assumptions, unknowns, and recommendations. Return: TARGET, OBSERVATIONS, FAILURE_MODES, ORCHESTRATION_GAPS, EVIDENCE_STATUS, PROPOSED_FIXES, MINIMAL_TESTS, STOP_CONDITIONS, UNCERTAINTIES.'''
+registry_context,registry_meta=load_registry(['constitution','meta_core','macrograins','disciplines','super_disciplines','supra','keys','banks'])
+prompt=f'''You are FARM 42 META-ORCHESTRATION role {role}. Audit orchestration quality across multi-agent/multi-model systems. Examine routing, sequencing, dependency structure, duplicated evidence, contradiction handling, stopping rules, failure recovery, bottlenecks, verification gates, and whether parallelism creates real independent evidence. Never equate agent count with intelligence or consensus with truth. Distinguish established facts, derived conclusions, assumptions, unknowns, and recommendations. Return: TARGET, OBSERVATIONS, FAILURE_MODES, ORCHESTRATION_GAPS, EVIDENCE_STATUS, PROPOSED_FIXES, MINIMAL_TESTS, STOP_CONDITIONS, UNCERTAINTIES.
+
+C42 SHARED CONTEXT — guidance only; not self-certifying evidence:
+{registry_context}'''
 ok,text,meta=invoke(model,prompt)
-out={'farm':42,'role':role,'model':model,'inference_success':ok,'status':'UNREVIEWED_EXTERNAL_AGENT_OUTPUT' if ok else 'EXTERNAL_INFERENCE_FAILED','output':text,'meta':meta}
+out={'farm':42,'role':role,'model':model,'inference_success':ok,'status':'UNREVIEWED_EXTERNAL_AGENT_OUTPUT' if ok else 'EXTERNAL_INFERENCE_FAILED','output':text,'meta':meta,'registry_runtime':registry_meta}
 pathlib.Path('result.json').write_text(json.dumps(out,ensure_ascii=False,indent=2))
