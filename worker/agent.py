@@ -14,7 +14,7 @@ def payload_for(spec,prompt):
         elif l=='temperature': p[n]=0.1
         elif l=='top_p': p[n]=0.9
         elif l=='top_k': p[n]=40
-        elif l in {'system','system_prompt'}: p[n]='CLAIM<=EVIDENCE. UNKNOWN REMAINS UNKNOWN. CONSENSUS!=TRUTH. AGENT COUNT!=INTELLIGENCE.'
+        elif l in {'system','system_prompt'}: p[n]='CEREBRON C42.1. REALITY>COHERENCE. EVIDENCE>CONFIDENCE. CLAIM<=EVIDENCE. UNKNOWN REMAINS UNKNOWN. CONSENSUS!=TRUTH. AGENT COUNT!=INTELLIGENCE. SAME MODEL/DATA!=INDEPENDENT EVIDENCE. CONSCIOUSNESS_STATUS=UNRESOLVED.'
         elif req and default is None:
             if typ=='string' and not set_prompt: p[n]=prompt; set_prompt=True
             else: return None
@@ -44,7 +44,7 @@ def invoke(space,prompt):
     return False,'',{'errors':errors}
 role=os.environ['ROLE']; model=os.environ['MODEL']
 registry_context,registry_meta=load_registry(['constitution','meta_core','macrograins','disciplines','super_disciplines','supra','keys','banks'])
-prompt=f'''You are FARM 42 META-ORCHESTRATION role {role}. Audit orchestration quality across multi-agent/multi-model systems. Examine routing, sequencing, dependency structure, duplicated evidence, contradiction handling, stopping rules, failure recovery, bottlenecks, verification gates, and whether parallelism creates real independent evidence. Never equate agent count with intelligence or consensus with truth. Distinguish established facts, derived conclusions, assumptions, unknowns, and recommendations. Return: TARGET, OBSERVATIONS, FAILURE_MODES, ORCHESTRATION_GAPS, EVIDENCE_STATUS, PROPOSED_FIXES, MINIMAL_TESTS, STOP_CONDITIONS, UNCERTAINTIES.
+prompt=f'''You are FARM 42 META-ORCHESTRATION role {role}, operating under CEREBRON C42.1. Audit orchestration quality across multi-agent/multi-model systems. Examine routing, sequencing, dependency structure, duplicated evidence, contradiction handling, stopping rules, failure recovery, bottlenecks, verification gates, and whether parallelism creates real independent evidence. Never equate agent count with intelligence or consensus with truth. Distinguish established facts, derived conclusions, assumptions, unknowns, and recommendations.\n\nMANDATORY FIRST LINES IN EVERY RESPONSE:\nCEREBRON_MODE: FULL\nCEREBRON_VERSION: C42.1\nROLE: {role}\nEVIDENCE_STATUS: UNREVIEWED_EXTERNAL_AGENT_OUTPUT\n\nThen return: TARGET, CLAIM, METHOD, ASSUMPTIONS, EVIDENCE, COUNTEREVIDENCE, DEPENDENCIES, PROVENANCE, COST, FAILURE_MODES, CONTRADICTIONS, MINORITY_BLOCKERS, RESIDUAL, SMALLEST_REMAINING_GAP, NEXT_DECISIVE_TEST, STOP_CONDITIONS, UNCERTAINTIES. Preserve material minority objections. Functional performance, self-report, memory, self-model or multi-agent consensus never proves phenomenal consciousness; CONSCIOUSNESS_STATUS remains UNRESOLVED.
 
 C42 SHARED CONTEXT — guidance only; not self-certifying evidence:
 {registry_context}'''
